@@ -1,0 +1,139 @@
+[
+  {
+    "pregunta": "¿Qué es Python?",
+    "respuestas": [
+      "Es un lenguaje de programación.",
+      "Es un lenguaje interpretado y de alto nivel."
+    ]
+  },
+  {
+    "pregunta": "¿Para qué se utiliza Python?",
+    "respuestas": [
+      "Para desarrollo web y análisis de datos.",
+      "Tiene una amplia cantidad de usos."
+    ]
+  },
+  {
+    "pregunta": "¿Qué tipo de lenguaje es Python?",
+    "respuestas": [
+      "Es un lenguaje interpretado, lenguaje dinámico y de propósito general.",
+      "Es un lenguaje compilado"
+    ]
+  },
+  {
+    "pregunta": "¿Qué son las listas en Python?",
+    "respuestas": [
+      "Son colecciones ordenadas de elementos, mutables y permiten datos duplicados",
+      "Son colecciones ordenadas de elementos, inmutables y solo permiten un tipo de dato."
+    ]
+  },
+  {
+    "pregunta": "¿Qué son los diccionarios en Python?",
+    "respuestas": [
+      "Son colecciones de pares clave-valor, Se utilizan para almacenar datos estructurados.",
+      "Son colecciones de valores únicos, sin claves, y no permiten modificar sus elementos una vez creados."
+    ]
+  },
+  {
+    "pregunta": "¿Python es un lenguaje compilado o interpretado?",
+    "respuestas": ["Es interpretado.", "Se ejecuta línea por línea."]
+  },
+  {
+    "pregunta": "¿Cómo se define una función en Python?",
+    "respuestas": [
+      "Usando la palabra clave `def`.",
+      "Se escribe `def nombre_función():`."
+    ]
+  },
+  {
+    "pregunta": "¿Qué es PEP 8?",
+    "respuestas": [
+      "Es una guía de estilo para Python.",
+      "Es un conjunto de recomendaciones para escribir código legible."
+    ]
+  },
+  {
+    "pregunta": "¿Python es de tipado dinámico o estático?",
+    "respuestas": [
+      "Es de tipado dinámico.",
+      "No necesitas declarar tipos explícitamente."
+    ]
+  },
+  {
+    "pregunta": "¿Cómo se importa un módulo en Python?",
+    "respuestas": [
+      "Usando la palabra clave `import`.",
+      "Ejemplo: `import math`."
+    ]
+  },
+  {
+    "pregunta": "¿Qué son los módulos en Python?",
+    "respuestas": [
+      "Son archivos que contienen código Python reutilizable.",
+      "Se utilizan para dividir programas grandes en partes más pequeñas."
+    ]
+  },
+  {
+    "pregunta": "¿Python admite programación orientada a objetos?",
+    "respuestas": [
+      "Sí, admite programación orientada a objetos.",
+      "Permite el uso de clases y objetos."
+    ]
+  },
+  {
+    "pregunta": "¿Qué es una clase en Python?",
+    "respuestas": [
+      "Es un modelo para crear objetos.",
+      "Define atributos y métodos."
+    ]
+  },
+  {
+    "pregunta": "¿Python admite funciones anónimas?",
+    "respuestas": [
+      "Sí, mediante las funciones lambda.",
+      "Las funciones lambda son funciones en una sola línea."
+    ]
+  },
+  {
+    "pregunta": "¿Qué es una excepción en Python?",
+    "respuestas": [
+      "Es un error durante la ejecución del programa.",
+      "Se puede manejar con `try-except`."
+    ]
+  },
+  {
+    "pregunta": "¿Qué son las listas por comprensión en Python?",
+    "respuestas": [
+      "Son una forma concisa de crear listas.",
+      "Se escriben usando una sola línea de código con bucles."
+    ]
+  },
+  {
+    "pregunta": "¿Python es multiplataforma?",
+    "respuestas": [
+      "Sí, puede ejecutarse en Windows, macOS y Linux.",
+      "Es independiente del sistema operativo."
+    ]
+  },
+  {
+    "pregunta": "¿Cómo se instala Python?",
+    "respuestas": [
+      "Desde la página oficial de Python.",
+      "Usando un gestor de paquetes como `brew` o `apt`."
+    ]
+  },
+  {
+    "pregunta": "¿Qué es el intérprete de Python?",
+    "respuestas": [
+      "Es el programa que ejecuta el código Python.",
+      "Convierte el código en instrucciones ejecutables."
+    ]
+  },
+  {
+    "pregunta": "¿Python soporta programación funcional?",
+    "respuestas": [
+      "Sí, admite programación funcional.",
+      "Se pueden usar funciones como `map`, `filter` y `reduce`."
+    ]
+  }
+]

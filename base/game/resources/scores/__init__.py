@@ -1,1 +1,1 @@
-from .scores import ranking
+from .ranking import Ranking
