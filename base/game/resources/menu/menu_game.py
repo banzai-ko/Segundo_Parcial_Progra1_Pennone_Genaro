@@ -6,13 +6,14 @@ from settings import SettingsLoader
 from game.resources.timer import GameTimer
 from game.resources.questions import Questions
 from game.resources.menu import Menu
+from game.resources.bar import AnimatedBar
 from game.resources.widgets import (
-    Button, TextTitle, Banner, Logo
+    Button, AnswerButton, TextTitle, Banner, Logo, Wildcard
 )
 
 config = SettingsLoader()
 
-DIMENSION_PANTALLA = config.screen
+SCREEN = config.screen
 questions_path = config.base_dir + config.get_key('QUESTIONS_FILE')
 questions = Questions(questions_path)
 questions.load_file()
@@ -28,58 +29,137 @@ class MenuGame(Menu):
 
     def __init__(self, name, pantalla, x, y, active, level_num, music_path):
         super().__init__(name, pantalla, x, y, active, level_num, music_path)
-        self.index = 0
+        self.index, self.puntaje = 0, 0
         self.surface = pg.image.load(config.base_dir +
                                      config.get_key('GAME_BACKGROUND')).convert_alpha()
-        self.surface = pg.transform.scale(self.surface, DIMENSION_PANTALLA)
-        self.public_answers = []
+        self.surface = pg.transform.scale(self.surface, SCREEN)
+        self.public_answers, self.widgets_list, self.public_banner = [], [], []
         self.slave_rect = self.surface.get_rect()
         self.slave_rect.x = x
         self.slave_rect.y = y
         self.question, self.answers = self.get_question_and_answers()
-        self.button_back = Button(x=120, y=DIMENSION_PANTALLA[1]//2+300, texto='VOLVER AL MENU',
+        self.button_back = Button(x=120, y=SCREEN[1]//2+300, texto='VOLVER AL MENU',
                                   pantalla=pantalla, on_click=self.click_back, on_click_param='form_main_menu')
-        self.widgets_list = [
-
-        ]
-        self.puntaje = 0
         self.pantalla = pantalla
         self.public = 14
-        self.public_banner = []
-        self.time = 10
         self.loop = True
         self.start = False
-        self.play_again_button = None
-        self.go_back_button = None
-        self.title = None
-        self.play_button = None
-        self.simple_timer = None
-        self.segundos = 10
-        self.question = None
-        self.answer_a, self.answer_b = None, None
-
+        self.segundos = 15
+        self.simple_timer, self.play_button, self.play_again_button, self.go_back_button, self.title = None, None, None, None, None
+        self.question, self.answer_a, self.answer_b = None, None, None
+        self.marcador_puntaje, self.next, self.change, self.change = None, None, None, None
+        self.wildcards_used_list = [0, 0, 0]
+        self.bar_graph = None
         self.generate_play('JUGAR')
-        self.marcador_puntaje = TextTitle(
-            x=100, y=20, texto='Puntaje: ' + str(self.puntaje), pantalla=pantalla, font_size=30
-        )
 
         self.contador_texto = TextTitle(
             x=800, y=20, texto='Tiempo: 10', pantalla=self.pantalla, font_size=20
         )
         self.logo = Logo(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 100, pantalla=pantalla, texto='', font_size=0, key='PYTHON_LOGO')
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 100,
+            pantalla=pantalla, texto='', font_size=0, key='PYTHON_LOGO')
 
         self. button_blue = Button(
-            x=349, y=576, texto='', pantalla=pantalla, on_click=self.game_logic, on_click_param='answer_b')
+            x=349, y=576, texto='', pantalla=pantalla,
+            on_click=self.game_logic, on_click_param='blue')
 
         self.button_red = Button(
-            x=845, y=576, texto='', pantalla=pantalla, on_click=self.game_logic, on_click_param='answer_a'
+            x=845, y=576, texto='', pantalla=pantalla,
+            on_click=self.game_logic, on_click_param='red'
         )
 
-        self.show([self.button_back, self.marcador_puntaje,
-                  self.contador_texto, self.logo])
+        self.show([self.button_back, self.contador_texto, self.logo])
 
         self.music_update()
+        # Testing the class in a Pygame application
+
+    def set_marcador_puntaje(self, puntaje):
+        self.hide([self.marcador_puntaje])
+        self.marcador_puntaje = TextTitle(
+            x=100, y=20, texto='Puntaje: ' + str(self.puntaje),
+            pantalla=self.pantalla, font_size=30
+        )
+        self.show([self.marcador_puntaje])
+
+    def get_wildcards_used(self, key):
+        match key:
+            case 'NEXT':
+                if self.wildcards_used_list[0] == 1:
+                    return True
+            case 'HALF':
+                if self.wildcards_used_list[1] == 1:
+                    return True
+            case 'CHANGE':
+                if self.wildcards_used_list[2] == 1:
+                    return True
+            case _:
+                return False
+
+    def set_wildcards_used(self, key):
+        match key:
+            case 'NEXT':
+                self.wildcards_used_list[0] = 1
+                self.next.set_disabled(True)
+            case 'HALF':
+                self.wildcards_used_list[1] = 1
+                self.half.set_disabled(True)
+            case 'CHANGE':
+                self.wildcards_used_list[2] = 1
+                self.change.set_disabled(True)
+            case 'ALL':
+                self.wildcards_used_list[0] = 1
+                self.wildcards_used_list[1] = 1
+                self.wildcards_used_list[2] = 1
+                self.next.set_disabled(True)
+                self.half.set_disabled(True)
+                self.change.set_disabled(True)
+            case _:
+                print(f'Error:No match for key:{key}')
+
+    def handle_wildcard(self, key):
+        match key:
+            case 'NEXT':
+                if not self.get_wildcards_used('NEXT'):
+                    answer = self.get_public_answers_result()
+                    self.game_logic(answer)
+                    self.set_wildcards_used('NEXT')
+            case 'HALF':
+                if not self.get_wildcards_used('HALF'):
+                    self.show_public_answers(self.pantalla, scope_range='half')
+                    self.set_wildcards_used('HALF')
+            case 'CHANGE':
+                if not self.get_wildcards_used('CHANGE'):
+                    self.next_question()
+                    self.set_wildcards_used('CHANGE')
+            case _:
+                print(f'Error:No match for key:{key}')
+
+    def half_wildcard(self, show):
+        print(f'Call half wildcard {show}')
+
+    def reload_wildcard(self, show):
+        print(f'Call Reload wildcard {show}')
+
+    def set_wildcards(self):
+        """
+            _summary_: Genera botones de Comodines
+        """
+        self.next = Wildcard(
+            x=SCREEN[0]//2 + 450,  y=SCREEN[1]//2,
+            texto='', key='NEXT_IMG', on_click=self.handle_wildcard,
+            pantalla=self.pantalla, on_click_param='NEXT')
+
+        self.half = Wildcard(
+            x=SCREEN[0]//2 + 490, y=SCREEN[1]//2,
+            texto='', key='HALF_IMG', on_click=self.handle_wildcard,
+            pantalla=self.pantalla, on_click_param='HALF')
+
+        self.change = Wildcard(
+            x=SCREEN[0]//2 + 530, y=SCREEN[1]//2,
+            texto='', key='CHANGE_IMG', on_click=self.handle_wildcard,
+            pantalla=self.pantalla, on_click_param='CHANGE'
+        )
+        self.show([self.next, self.half, self.change])
 
     def generate_play(self, texto: str):
         """
@@ -89,24 +169,27 @@ class MenuGame(Menu):
             texto -- _description_ Texto del botón
         """
         self.play_button = Button(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 200, texto=texto, pantalla=self.pantalla, on_click=self.start_game, on_click_param='play')
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 200,
+            texto=texto, pantalla=self.pantalla, on_click=self.start_game,
+            on_click_param='play')
         self.widgets_list.append(self.play_button)
 
     def start_game(self, show):
         """
-         PLAY - Entry point
+        PLAY - Entry point
 
         Arguments:
             show -- Mensaje para informar en consola cuando comienza el juego
         """
         self.index = 0
         self.puntaje = 0
+        self.set_marcador_puntaje(0)
         print(f'Estado Juego: {show}')
         self.generate_public_answers()
         self.start = True
         self.hide([self.play_button])
         self.next_question()
-
+        self.set_wildcards()
         self.remove_element(None, 'banner')
 
     def game_logic(self, answer):
@@ -116,12 +199,14 @@ class MenuGame(Menu):
         Arguments:
             answer -- _description_ Respuesta del USUARIO.
         """
-        print(answer)
         valid = self.check_response(
-            answer, self.get_public_answers_result())
+            answer, self.get_public_answers_result()
+        )
         self.show_public_answers(self.pantalla)
+
         if (not valid):
             self.game_over()
+
         else:
             self.increment_puntaje()
             valid = False
@@ -138,9 +223,12 @@ class MenuGame(Menu):
         Returns:
             _description_
         """
+        print(f'Public Answer: {public_answer}')
+        print(f'User Answer: {answer}')
         if (not answer == public_answer):
             print(f'PERDISTE, RESPUESTA CORRECTA: {public_answer}')
             return False
+
         print('GANASTE UN PUNTO SIGUIENTE PREGUNTA >>>')
         return True
 
@@ -155,20 +243,35 @@ class MenuGame(Menu):
         self.question, self.answers = self.get_question_and_answers()
         self.debugger(config.str_to_bool(config.get_key('DEBUGGER')))
         self.question = TextTitle(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 300, texto=self.question, pantalla=self.pantalla, font_size=25)
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 300,
+            texto=self.question, pantalla=self.pantalla, font_size=25)
 
-        self.answer_a = Button(
-            x=DIMENSION_PANTALLA[0]//2 - 300, y=DIMENSION_PANTALLA[1]//2 - 200, texto=self.answers[0], pantalla=self.pantalla, on_click=self.game_logic, on_click_param='red')
+        self.answer_a = AnswerButton(
+            x=SCREEN[0]//2 - 300, y=SCREEN[1]//2 - 200,
+            texto=self.answers[0], pantalla=self.pantalla,
+            on_click=self.game_logic, on_click_param='red')
 
-        self.answer_b = Button(
-            x=DIMENSION_PANTALLA[0]//2 + 300, y=DIMENSION_PANTALLA[1]//2 - 200, texto=self.answers[1], pantalla=self.pantalla, on_click=self.game_logic, on_click_param='blue')
+        self.answer_b = AnswerButton(
+            x=SCREEN[0]//2 + 300, y=SCREEN[1]//2 - 200,
+            texto=self.answers[1], pantalla=self.pantalla,
+            on_click=self.game_logic, on_click_param='blue')
         self.show([self.question, self.answer_a, self.answer_b])
+        # Dataset
+        self.hide([self.bar_graph])
+        self.bg_image = pg.image.load(config.base_dir +
+                                      config.get_key('BAR_GRAPH')).convert_alpha()
+        # Create an instance of AnimatedBarGraph
+        self.bar_graph = AnimatedBar(x=SCREEN[0]//2, y=SCREEN[1]//2, texto='',
+                                     pantalla=self.pantalla, data=self.public_answers, image=self.bg_image)
+        self.show([self.bar_graph])
+        self.bar_graph.draw()
+        self.bar_graph.update()
 
     def increment_puntaje(self) -> None:
         """
-         Incrementa el puntaje y actualiza el marcador
-        """
-        self.remove_element(self.marcador_puntaje)
+            Incrementa el puntaje y actualiza el marcador
+            """
+        self.hide([self.marcador_puntaje])
         self.puntaje += 1
 
         print(f'Puntaje: {self.puntaje}')
@@ -186,7 +289,7 @@ class MenuGame(Menu):
             element -- _description_ (default: {None}) Elemento a remover, si se tiene acceso
             type_elem -- _description_ (default: {'default'}) Elemento a remover. Si no se tiene acceso. En este caso se remueven todos los elementos 'banner'
         """
-        if element and type_elem == 'default':
+        if element is not None and type_elem == 'default':
             self.widgets_list = [
                 widget for widget in self.widgets_list if widget != element
             ]
@@ -197,22 +300,32 @@ class MenuGame(Menu):
 
     def game_over(self):
         """
-        _summary_ Final del juego
+            _summary_ Final del juego
         """
-        print('GAME OVER')
         self.hide([self.question, self.answer_a, self.answer_b])
+        self.set_wildcards_used('ALL')
+        print('GAME OVER')
         self.title = TextTitle(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 300, texto='Game Over', pantalla=self.pantalla, font_size=50
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 350,
+            texto='Game Over', pantalla=self.pantalla, font_size=90
         )
         self.play_again_button = Button(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 200, texto='Jugar de nuevo', pantalla=self.pantalla, on_click=self.play_again, on_click_param='play_again')
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 250,
+            texto='Jugar de nuevo', pantalla=self.pantalla,
+            on_click=self.play_again, on_click_param='play_again'
+        )
         self.go_back_button = Button(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2 - 100, texto='Volver al menu Principal', pantalla=self.pantalla, on_click=self.go_back, on_click_param='form_main_menu')
-        self.show([self.title, self.play_again_button, self.go_back_button])
+            x=SCREEN[0]//2, y=SCREEN[1]//2 - 200,
+            texto='Volver al menu Principal', pantalla=self.pantalla,
+            on_click=self.go_back, on_click_param='form_main_menu'
+        )
+        self.show(
+            [self.title, self.play_again_button, self.go_back_button]
+        )
 
     def show(self, lista: list) -> None:
         """
-        _summary_ Agrega elementos a la vista
+            _summary_ Agrega elementos a la vista
 
         Arguments:
             lista -- Lista de elementos para agregar a la vista
@@ -222,41 +335,43 @@ class MenuGame(Menu):
 
     def hide(self, lista: list) -> None:
         """
-        _summary_ Remueve elementos de la vista
+            _summary_ Remueve elementos de la vista
 
         Arguments:
             lista -- _description_ Lista de elementos a remover de la vista
         """
         for element in lista:
             if element in self.widgets_list:
-                self.widgets_list.remove(element)
+                self.remove_element(element)
 
-    def play_again(self, param):
+    def play_again(self, param) -> None:
         """
-        _summary_ Volver a jugar
+            _summary_ Volver a jugar
 
         Arguments:
             param -- _description_ Texto informativo para terminal. No se muestra en vista
         """
-        self.hide([self.play_again_button, self.go_back_button, self.title])
+        self.hide([self.play_again_button,
+                   self.go_back_button, self.title])
         self.remove_element(None, 'banner')
         self.start_game(param)
 
     def go_back(self, param):
         """
-        Volver al menu.
+            Volver al menu.
 
         Arguments:
             param -- _description_ Menu al cual se vuelve
         """
-        self.hide([self.play_again_button, self.go_back_button, self.title])
+        self.hide([self.play_again_button,
+                   self.go_back_button, self.title])
         self.remove_element(None, 'banner')
         self.generate_play('JUGAR')
         self.click_back(param)
 
     def generate_public_answers(self) -> None:
         """
-        _summary_ Simular la generación de Repuestas del público
+            _summary_ Simular la generación de Repuestas del público
         """
         red, blue = 0, 0
         if self.public_answers:
@@ -282,7 +397,7 @@ class MenuGame(Menu):
         red = 0
         blue = 0
         for i in range(self.public):
-            if (self.public_answers[i] == 1):
+            if (self.public_answers[i] == 0):
                 red += 1
             else:
                 blue += 1
@@ -290,9 +405,9 @@ class MenuGame(Menu):
             return 'red'
         return 'blue'
 
-    def show_public_answers(self, pantalla) -> None:  # ANCHOR
+    def show_public_answers(self,  pantalla, scope_range=None) -> None:  # ANCHOR
         """
-        _summary_ Muestra las respuestas del público
+            _summary_ Muestra las respuestas del público
 
         Arguments:
             pantalla -- _description_ Objeto pantalla
@@ -308,21 +423,23 @@ class MenuGame(Menu):
             self.public_banner.append(banner)
             self.widgets_list.append(self.public_banner[i])
             position += 55
+            if scope_range != None and i >= 6:
+                break
             if (i == 6):
                 position = 737
             i += 1
 
     def generate_color_banner(self, answer, position, pantalla):  # Crear clase?
         """
-        _summary_ Crea el objeto banner
+            _summary_ Crea el objeto banner
 
-        Arguments:
-            answer -- Respuesta: 0 o 1 . paraa Rojo o Azul
-            position -- _description_ Posición del marcador, horizontal, eje x
-            pantalla -- _description_ Objeto pantalla
+            Arguments:
+                answer -- Respuesta: 0 o 1 . paraa Rojo o Azul
+                position -- _description_ Posición del marcador, horizontal, eje x
+                pantalla -- _description_ Objeto pantalla
 
-        Returns:
-            _description_ Devuelve el banner con los campos para agregar al a la lista de vista
+            Returns:
+                _description_ Devuelve el banner con los campos para agregar al a la lista de vista
         """
         color = (0, 0, 0)
         if (answer == 1):
@@ -340,16 +457,18 @@ class MenuGame(Menu):
 
     def get_question_and_answers(self) -> tuple:
         """
-        _summary_ Obtiene la pregunta y sus respuestas. Depende clase Questions
+            _summary_ Obtiene la pregunta y sus respuestas. Depende clase Questions
 
-        Returns:
-            _description_ Tupla con pregunta y lista derespuestas
+            Returns:
+                _description_ Tupla con pregunta y lista derespuestas
         """
         question = questions.get_question(self.index)
         answers = questions.get_answers(self.index)
         return (question, answers)
 
     def click_back(self, parametro):
+        self.index = 0
+        self.puntaje = 0
         self.set_active(parametro)
 
     def update_contador(self, segundos):
@@ -367,9 +486,9 @@ class MenuGame(Menu):
 
     def debugger(self, config):
         """
-        Debugger method para probar dinámica del juego - Mover a clase separada
+            Debugger method para probar dinámica del juego - Mover a clase separada
 
-        Arguments:
+            Arguments:
             config -- Objeto settings
         """
         result = self.get_public_answers_result()
@@ -377,6 +496,7 @@ class MenuGame(Menu):
         table_data = [
             ["Public Answers", self.public_answers],
         ]
+
         headers = ["Public Answers"] + \
             [str(i + 1) for i in range(len(self.public_answers))]
 

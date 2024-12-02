@@ -1,11 +1,11 @@
 import pygame as pg
 from settings import SettingsLoader
-from game.resources.menu import Menu
-from game.resources.widgets import (
+from ..widgets import (
     Button, TextTitle
 )
-
+from .menu import Menu
 config = SettingsLoader()
+
 
 DIMENSION_PANTALLA = config.screen
 
@@ -53,7 +53,7 @@ class MenuRanking(Menu):
             )
 
             self.ranking_on_screen.append(
-                TextTitle(x=DIMENSION_PANTALLA[0]//2+100, y=DIMENSION_PANTALLA[1]//2.5+i*25, texto=f'{
+                TextTitle(x=DIMENSION_PANTALLA[0]//2+100, y=DIMENSION_PANTALLA[1]//2.5+i*25 - 150, texto=f'{
                           self.ranking_list[i][1]}', pantalla=self.pantalla, font_size=25)
             )
 
