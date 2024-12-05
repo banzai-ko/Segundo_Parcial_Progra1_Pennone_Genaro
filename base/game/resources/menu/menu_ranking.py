@@ -1,6 +1,6 @@
 import pygame as pg
 from settings import SettingsLoader
-from ..widgets import (
+from game.resources.widgets import (
     Button, TextTitle
 )
 from .menu import Menu
@@ -33,9 +33,21 @@ class MenuRanking(Menu):
         self.ranking_list = ranking_list
 
         self.subtitle = TextTitle(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2-300, texto='TOP 10 Ranking', pantalla=pantalla, font_size=50)
-        self.button_return_menu = Button(x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2+250, texto='VOLVER AL MENU',
-                                         pantalla=pantalla, on_click=self.click_return_menu, on_click_param='form_main_menu')
+            x=DIMENSION_PANTALLA[0]//2,
+            y=DIMENSION_PANTALLA[1]//2-300,
+            texto='TOP 10 Ranking',
+            pantalla=pantalla,
+            font_size=50
+        )
+
+        self.button_return_menu = Button(
+            x=DIMENSION_PANTALLA[0]//2,
+            y=DIMENSION_PANTALLA[1]//2+250,
+            texto='VOLVER AL MENU',
+            pantalla=pantalla,
+            on_click=self.click_return_menu,
+            on_click_param='form_main_menu'
+        )
 
         self.init_ranking()
 
@@ -48,13 +60,19 @@ class MenuRanking(Menu):
         for i in range(len(self.ranking_list)):
 
             self.ranking_on_screen.append(
-                TextTitle(x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2.5+i*25, texto=f'{
-                          self.ranking_list[i][0]}', pantalla=self.pantalla, font_size=25)
+                TextTitle(
+                    x=DIMENSION_PANTALLA[0]//2 - 75,
+                    y=DIMENSION_PANTALLA[1]//2+i*25 - 150,
+                    texto=f'{
+                        self.ranking_list[i][0]}', pantalla=self.pantalla, font_size=25)
             )
 
             self.ranking_on_screen.append(
-                TextTitle(x=DIMENSION_PANTALLA[0]//2+100, y=DIMENSION_PANTALLA[1]//2.5+i*25 - 150, texto=f'{
-                          self.ranking_list[i][1]}', pantalla=self.pantalla, font_size=25)
+                TextTitle(
+                    x=DIMENSION_PANTALLA[0]//2+50,
+                    y=DIMENSION_PANTALLA[1]//2+i*25 - 150,
+                    texto=f'{
+                        self.ranking_list[i][1]}', pantalla=self.pantalla, font_size=25)
             )
 
     def click_return_menu(self, parametro):

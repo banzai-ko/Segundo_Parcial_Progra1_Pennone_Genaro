@@ -21,6 +21,11 @@ class MenuManager:
     _summary_ Handler de menus
     """
 
+    FORM_ENTER_NAME = 4
+    FORM_LEVEL = 3
+    FORM_MAIN = 0
+    exit_requested = False
+
     def __init__(self, pantalla, ranking_db=None):
 
         self.main_screen = pantalla
@@ -28,18 +33,60 @@ class MenuManager:
         self.current_level = 0
 
         self.forms = [
-            MainMenu(name='form_main_menu', pantalla=self.main_screen,
-                     x=0, y=0, active=True, level_num=1, music_path=SONIDO_MENU),
-            MenuRanking(name='form_rankings', pantalla=self.main_screen, x=0, y=0, active=True,
-                        level_num=1, music_path=SONIDO_RANKING, ranking_list=self.ranking_db),
-            MenuOptions(name='form_options', pantalla=self.main_screen, x=0,
-                        y=0, active=True, level_num=1, music_path=SONIDO_OPCIONES),
-            MenuPause(name="form_pause", pantalla=self.main_screen, x=0, y=0,
-                      active=True, level_num=self.current_level, music_name=SONIDO_MUSIC),
-            MenuEnterName(name="form_enter_name", pantalla=self.main_screen, x=0,
-                          y=0, active=True, level_num=1, music_name=SONIDO_MENU, score=0),
-            MenuGame(name="form_game", pantalla=self.main_screen, x=0,
-                     y=0, active=True, level_num=1, music_path=SONIDO_MENU)
+            MainMenu(
+                name='form_main_menu',
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=1,
+                music_path=SONIDO_MENU
+            ),
+            MenuRanking(
+                name='form_rankings',
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=1,
+                music_path=SONIDO_RANKING,
+                ranking_list=self.ranking_db
+            ),
+            MenuOptions(
+                name='form_options',
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=1,
+                music_path=SONIDO_OPCIONES
+            ),
+            MenuPause(
+                name="form_pause",
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=self.current_level,
+                music_name=SONIDO_MUSIC),
+            MenuEnterName(
+                name="form_enter_name",
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=1,
+                music_name=SONIDO_MENU,
+            ),
+            MenuGame(
+                name="form_game",
+                pantalla=self.main_screen,
+                x=0,
+                y=0,
+                active=True,
+                level_num=1,
+                music_path=SONIDO_MENU
+            )
 
         ]
 
@@ -55,38 +102,31 @@ class MenuManager:
             if (event.type == pg.KEYDOWN):
                 if (event.key == pg.K_ESCAPE):
                     self.forms[3].set_active("form_pause")
+            elif event.type == pg.QUIT:  # Handle window close button
+                self.exit_game()
 
     def forms_update(self, event_list: list):
-        """
-        _summary_ Actualiza el estado de los menus
+        """Update and draw active forms"""
+        for index, form in enumerate(self.forms):
+            if not form.active:
+                continue
 
-        Arguments:
-            event_list -- _description_
-        """
+            if index == self.FORM_ENTER_NAME:
+                form.update(event_list)
+            else:
+                form.update()
 
-        if self.forms[0].active:
-            self.forms[0].update()
-            self.forms[0].draw()
+            form.draw()
 
-        elif self.forms[1].active:
-            self.forms[1].update()
-            self.forms[1].draw()
+            # Check if main menu form requests exit
+            if index == self.FORM_MAIN and getattr(form, 'exit_requested', False):
+                self.exit_game()
 
-        elif self.forms[2].active:
-            self.forms[2].update()
-            self.forms[2].draw()
+            if index == self.FORM_LEVEL and form.level_restart:
 
-        elif (self.forms[3].active):
-            self.forms[3].update()
-            self.forms[3].draw()
+                pass
 
-        elif (self.forms[4].active):
-            self.forms[4].update()
-            self.forms[4].draw()
-
-        elif (self.forms[5].active):
-            self.forms[5].update()
-            self.forms[5].draw()
+            break
 
     def update(self, event_list: list):
         self.keys_update(event_list)

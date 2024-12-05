@@ -5,11 +5,26 @@ class Ranking:
     """
     _summary_ Clase para manejar el Ranking
     """
+    __instance = None
+
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
 
     def __init__(self):
-        self.config = SettingsLoader()
-        self.config_file = self.config.base_dir + \
-            self.config.get_key('RANK_FILE')
+        if not hasattr(self, '_initialized'):
+            self.config = SettingsLoader()
+            self.config_file = self.config.base_dir + \
+                self.config.get_key('RANK_FILE')
+            self._initialized = True
+
+    @classmethod
+    def get_ranking(cls):
+        """Get or create singleton instance"""
+        if cls.__instance is None:
+            cls()
+        return cls.__instance
 
     def sort_matrix(self, matrix: list[list]) -> None:
         """
@@ -18,7 +33,6 @@ class Ranking:
         Arguments:
             matrix -- _description_
         """
-
         for i in range(len(matrix) - 1):
             for j in range(i + 1, len(matrix)):
                 if int(matrix[i][1].strip()) < int(matrix[j][1].strip()):
@@ -41,8 +55,7 @@ class Ranking:
         with open(file_path, 'r', encoding='utf-8') as rkng:
             lineas = rkng.read()
             for linea in lineas.split('\n'):
-                # Strip extra spaces and ignore empty lines
-                if linea.strip():  # Skip empty lines
+                if linea.strip():
                     ranking.append(linea.split(','))
 
         # Sort the matrix based on the second column (score)
@@ -57,4 +70,5 @@ class Ranking:
             entry -- _Objeto usuario
         """
         with open(self.config_file, 'a', encoding='utf-8') as rkng:
-            rkng.write(f'{entry}\n')
+            nombre, puntaje = entry
+            rkng.write(f'{nombre}, {puntaje}\n')

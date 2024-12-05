@@ -25,6 +25,7 @@ class Wildcard(Button):
 
         self.button_rect = self.image.get_rect(center=(x, y))
         self.logo_rect = self.rect
+        self.wildcards_used_list = [0, 0, 0]
 
     def draw(self):
         self.pantalla.blit(self.logo, self.logo_rect)

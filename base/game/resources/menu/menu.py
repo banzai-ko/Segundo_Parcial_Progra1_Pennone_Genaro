@@ -22,11 +22,12 @@ class Menu:
     def __init__(self, name: str, pantalla, x: int, y: int, active: bool, level_num: int, music_path: str):
         self.forms_dict[name] = self
         self.pantalla = pantalla
-        self.active = active
+        self.active = True
         self.x = x
         self.y = y
         self.level_num = level_num
         self.music_path = config.base_dir + music_path
+    
 
     def set_active(self, name: str):
         """
@@ -39,7 +40,9 @@ class Menu:
             aux_form.active = False
         self.forms_dict[name].active = True
         self.music_update()
-
+    
+    
+        
     def music_update(self):
         """
         _summary_ Actualiza el estado de la musica

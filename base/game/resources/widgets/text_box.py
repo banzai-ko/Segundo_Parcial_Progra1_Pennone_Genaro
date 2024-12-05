@@ -2,8 +2,8 @@ import pygame as pg
 from .widget import Widget
 from settings import SettingsLoader
 config = SettingsLoader()
-COLOR_AZUL = config.get_key('COLOR_AZUL')
-COLOR_AZUL = tuple(map(int, COLOR_AZUL.strip('()').split(', ')))
+COLOR_BLANCO = config.get_key('COLOR_BLANCO')
+COLOR_BLANCO = tuple(map(int, COLOR_BLANCO.strip('()').split(', ')))
 
 
 class TextBox(Widget):
@@ -13,9 +13,9 @@ class TextBox(Widget):
 
         # Set up font and initial text rendering
         self.font = pg.font.Font(
-            config.get_key('BUBBLEBOY'), self.font_size)
+            config.get_key('BUBBLE_BOBBLE'), self.font_size)
         self.image = self.font.render(
-            self.texto, True, COLOR_AZUL)
+            self.texto, True, COLOR_BLANCO)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -28,28 +28,30 @@ class TextBox(Widget):
         self.on_click_param = on_click_param
 
         self.write_on = True  # Enable writing
-        self.writing = ''  # Dynamic user input
-        self.image_writing = self.font.render(
-            self.writing, True, COLOR_AZUL)
+        
+        self.box_width = 200  # Add a fixed width for the textbox
+        self.writing = ''
+        self.image_writing = self.font.render(self.writing, True, COLOR_BLANCO)
         self.rect_writing = self.image_writing.get_rect()
-        # Adjust position below initial text
-        self.rect_writing.center = (x, y + 30)
-
+        self.rect_writing.centerx = x  # Center horizontally at x
+        self.rect_writing.centery = y - 10  # Offset vertically
+ 
     def write_on_box(self, event_list):
-        """Handle user input for the TextBox."""
         for evento in event_list:
             if evento.type == pg.KEYDOWN and self.write_on:
-                if evento.key == pg.K_BACKSPACE:  # Remove last character
+                if evento.key == pg.K_BACKSPACE:
                     self.writing = self.writing[:-1]
-                else:  # Add new character
+                else:
                     self.writing += evento.unicode
 
-                # Play sound for key press
                 self.click_option_sfx.play()
 
                 # Update the writing surface
                 self.image_writing = self.font.render(
-                    self.writing, True, config.get_key('COLOR_AZUL'))
+                    self.writing, True, COLOR_BLANCO)
+                self.rect_writing = self.image_writing.get_rect()
+                self.rect_writing.centerx = self.x  # Keep centered at original x position
+                self.rect_writing.centery = self.y - 10
 
     def draw(self):
         """Draw the text box and user input to the screen."""

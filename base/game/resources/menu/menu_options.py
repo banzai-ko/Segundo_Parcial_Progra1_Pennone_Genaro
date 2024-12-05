@@ -22,17 +22,44 @@ class MenuOptions(Menu):
         self.slave_rect.y = y
 
         self.optiones_title = TextTitle(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2-200, texto='This or that', pantalla=pantalla, font_size=75)
+            x=DIMENSION_PANTALLA[0]//2,
+              y=DIMENSION_PANTALLA[1]//2-200, 
+              texto='This or that', 
+              pantalla=pantalla, 
+              font_size=75
+        )
         self.optiones_subtitle = TextTitle(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2-150, texto='OPCIONES', pantalla=pantalla, font_size=50)
+            x=DIMENSION_PANTALLA[0]//2, 
+            y=DIMENSION_PANTALLA[1]//2-150, 
+            texto='OPCIONES', 
+            pantalla=pantalla, 
+            font_size=50
+        )
 
         self.button_music_on = Button(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2-70, texto='MUSIC ON', pantalla=pantalla, on_click=self.click_music_on, on_click_param=config.config)
+            x=DIMENSION_PANTALLA[0]//2, 
+            y=DIMENSION_PANTALLA[1]//2-70, texto='MUSIC ON', 
+            pantalla=pantalla, 
+            on_click=self.click_music_on, 
+            on_click_param=config.config
+        )
         self.button_music_off = Button(
-            x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2+70, texto='MUSIC OFF', pantalla=pantalla, on_click=self.click_music_off, on_click_param=config.config)
+            x=DIMENSION_PANTALLA[0]//2, 
+            y=DIMENSION_PANTALLA[1]//2+70, 
+            texto='MUSIC OFF', 
+            pantalla=pantalla,
+            on_click=self.click_music_off, 
+            on_click_param=config.config
+        )
 
-        self.button_back = Button(x=DIMENSION_PANTALLA[0]//2, y=DIMENSION_PANTALLA[1]//2+250, texto='VOLVER AL MENU',
-                                  pantalla=pantalla, on_click=self.click_back, on_click_param='form_main_menu')
+        self.button_back = Button(
+            x=DIMENSION_PANTALLA[0]//2, 
+            y=DIMENSION_PANTALLA[1]//2+250, 
+            texto='VOLVER AL MENU',
+            pantalla=pantalla, 
+            on_click=self.click_back, 
+            on_click_param='form_main_menu'
+        )
         self.widgets_list = [
             self.optiones_subtitle, self.optiones_title,
             self.button_back, self.button_music_off,

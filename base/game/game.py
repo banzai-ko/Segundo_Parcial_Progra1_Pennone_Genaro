@@ -26,7 +26,7 @@ def run_game():
     while run:
         event_list = pg.event.get()
         for event in event_list:
-            if event.type == pg.QUIT:
+            if event.type == pg.QUIT or MenuManager.exit_requested:
                 run = False
 
         menu.update(event_list)
